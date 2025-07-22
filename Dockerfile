@@ -1,14 +1,18 @@
-FROM ubuntu:18.04
-RUN apt-get update && apt-get install -y autoconf automake curl cmake git libtool make \
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    git cmake g++ libjson-c-dev libwebsockets-dev libssl-dev \
+    build-essential curl tini bash \
     && git clone --depth=1 https://github.com/tsl0922/ttyd.git /ttyd \
-    && cd /ttyd && env BUILD_TARGET=x86_64 ./scripts/cross-build.sh
+    && cd /ttyd && mkdir build && cd build \
+    && cmake .. && make && make install \
+    && rm -rf /ttyd
 
-FROM alpine
-COPY --from=0 /ttyd/build/ttyd /usr/bin/ttyd
-RUN apk add --no-cache bash tini
+# Expose the ttyd port
+EXPOSE 7681
 
-EXPOSE 5901 6080 7681
-WORKDIR /root
-
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["ttyd", "bash"]
+ENTRYPOINT ["/usr/local/bin/ttyd"]
+CMD ["bash"]
