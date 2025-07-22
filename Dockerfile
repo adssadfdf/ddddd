@@ -7,11 +7,16 @@ RUN apk update && apk add \
     git \
     ttyd \
     nano \
-    htop \
-    neofetch
+    htop
 
-# تعيين البورت 8080
+# تثبيت neofetch يدويًا
+RUN git clone https://github.com/dylanaraps/neofetch && \
+    cd neofetch && \
+    cp neofetch /usr/local/bin/ && \
+    chmod +x /usr/local/bin/neofetch
+
+# فتح بورت 8080
 EXPOSE 8080
 
-# تشغيل ttyd مع bash
+# بدء ttyd مع bash
 CMD ["ttyd", "-p", "8080", "bash"]
